@@ -24,7 +24,7 @@ project_apill/
 │   ├── aduan.py
 │   ├── dashboard.py
 │   └── laporan.py
-├── templates/                 # Tidak berubah, hanya url_for() diperbarui
+├── templates/                 
 └── static/
 ```
 
