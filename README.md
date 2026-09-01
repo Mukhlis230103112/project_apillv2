@@ -36,8 +36,3 @@ source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 python app.py
 ```
-
-Pastikan `.env` berisi `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`,
-`DB_PASSWORD`. Opsional: `SECRET_KEY`, `FLASK_DEBUG=True` untuk mode
-development (default False, aman untuk production).
-
