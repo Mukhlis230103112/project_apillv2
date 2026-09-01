@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">
+            Dashboard Inventaris APILL
+        </h1>
+
+        <p class="page-subtitle">
+            Monitoring Inventaris, Kondisi Perangkat, dan Laporan Gangguan
+        </p>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     RINGKASAN
+========================== -->
+
+<div class="cards">
+
+    <div class="card">
+        <div class="card-title">
+            Total Simpang
+        </div>
+
+        <div class="card-value">
+            {{ ringkasan[0] }}
+        </div>
+
+        <div class="card-description">
+            Lokasi APILL terdaftar
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-title">
+            Total Perangkat
+        </div>
+
+        <div class="card-value">
+            {{ ringkasan[1] }}
+        </div>
+
+        <div class="card-description">
+            Perangkat Inventaris
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-title">
+            Total Aduan
+        </div>
+
+        <div class="card-value">
+            {{ ringkasan[2] }}
+        </div>
+
+        <div class="card-description">
+            Laporan gangguan
+        </div>
+    </div>
+
+
+    <div class="card">
+        <div class="card-title">
+            Total Penanganan
+        </div>
+
+        <div class="card-value">
+            {{ ringkasan[3] }}
+        </div>
+
+        <div class="card-description">
+            Penanganan aduan
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     GRAFIK ADUAN PER BULAN
+========================== -->
+
+<div class="table-card dashboard-chart-card">
+
+    <div class="table-header">
+        <h3>Aduan per Bulan</h3>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="aduanBulananChart"></canvas>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     GRAFIK KONDISI PERANGKAT
+========================== -->
+
+<div class="chart-card">
+
+    <div class="chart-header">
+        <h3>Kondisi Perangkat</h3>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="kondisiPerangkatChart"></canvas>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     GRAFIK KATEGORI GANGGUAN
+========================== -->
+
+<div class="chart-card large-chart">
+
+    <div class="chart-header">
+        <h3>Kategori Gangguan</h3>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="kategoriGangguanChart"></canvas>
+    </div>
+
+</div>
+
+
+<!-- =========================
+     SIMPANG TERBANYAK ADUAN
+========================== -->
+
+<div class="table-card">
+
+    <div class="table-header">
+        <h3>
+            Simpang dengan Aduan Terbanyak
+        </h3>
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Kode</th>
+                    <th>Simpang</th>
+                    <th>Jumlah Aduan</th>
+                </tr>
+            </thead>
+
+
+            <tbody>
+
+                {% for item in aduan_simpang[:5] %}
+
+                <tr>
+
+                    <td>
+                        {{ loop.index }}
+                    </td>
+
+                    <td>
+                        {{ item[0] }}
+                    </td>
+
+                    <td>
+                        {{ item[1] }}
+                    </td>
+
+                    <td>
+                        <strong>
+                            {{ item[2] }}
+                        </strong>
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+                    <td colspan="4" class="empty-data">
+                        Belum ada data aduan.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    /* Data dari server (Jinja) untuk dipakai dashboard.js.
+       Bagian ini sengaja tetap inline karena butuh variabel Jinja;
+       logika pembuatan chart-nya sendiri ada di static/js/dashboard.js */
+    window.dashboardData = {
+        bulanLabels: {{ bulan_labels | tojson }},
+        bulanData: {{ bulan_data | tojson }},
+
+        kondisiLabels: [
+            {% for item in kondisi_perangkat %}
+                {{ item[0] | tojson }},
+            {% endfor %}
+        ],
+        kondisiData: [
+            {% for item in kondisi_perangkat %}
+                {{ item[1] }},
+            {% endfor %}
+        ],
+
+        gangguanLabels: [
+            {% for item in kategori_gangguan %}
+                {{ item[0] | tojson }},
+            {% endfor %}
+        ],
+        gangguanData: [
+            {% for item in kategori_gangguan %}
+                {{ item[1] }},
+            {% endfor %}
+        ]
+    };
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

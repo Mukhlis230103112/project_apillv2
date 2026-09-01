@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}
+Aduan - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">
+            Data Aduan
+        </h1>
+
+        <p class="page-subtitle">
+            Laporan gangguan APILL
+        </p>
+
+    </div>
+
+    <a href="{{ url_for('aduan.tambah') }}" class="button">
+        + Tambah Aduan
+    </a>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <h3>
+            Daftar Aduan
+        </h3>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>No</th>
+                    <th>Tanggal</th>
+                    <th>Simpang</th>
+                    <th>Gangguan</th>
+                    <th>Kategori</th>
+                    <th>Pelapor</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for a in aduan %}
+
+                <tr>
+
+                    <td>
+                        {{ loop.index }}
+                    </td>
+
+                    <td>
+                        {{ a[1].strftime('%d-%m-%Y') }}
+                    </td>
+
+                    <td>
+                        <strong>
+                            {{ a[3] }}
+                        </strong>
+
+                        <br>
+
+                        <small>
+                            {{ a[2] }}
+                        </small>
+                    </td>
+
+                    <td>
+                        {{ a[5] or '-' }}
+                    </td>
+
+                    <td>
+                        {{ a[6] or '-' }}
+                    </td>
+
+                    <td>
+                        {{ a[7] or '-' }}
+                    </td>
+
+                    <td>
+                        {{ a[8] or '-' }}
+                    </td>
+
+                    <td>
+
+                    <td>
+
+                        <div class="action">
+
+                            <a href="{{ url_for(
+                'aduan.detail',
+                id_aduan=a[0]
+            ) }}" class="button">
+                                Detail
+                            </a>
+
+                            <a href="{{ url_for(
+                'aduan.edit',
+                id_aduan=a[0]
+            ) }}" class="button btn-edit">
+                                Edit
+                            </a>
+
+                            <form action="{{ url_for(
+                'aduan.hapus',
+                id_aduan=a[0]
+            ) }}" method="POST" style="display:inline;">
+
+                                <button type="submit" class="button btn-delete" onclick="
+                    return confirm(
+                        'Yakin ingin menghapus aduan ini?'
+                    );
+                ">
+                                    Hapus
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="8" class="empty-data">
+
+                        Belum ada data aduan.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

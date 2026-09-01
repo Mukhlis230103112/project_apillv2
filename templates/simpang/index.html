@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}
+Simpang - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">
+            Data Simpang
+        </h1>
+
+        <p class="page-subtitle">
+            Manajemen data inventaris simpang APILL
+        </p>
+    </div>
+
+    <a href="{{ url_for('simpang.tambah') }}" class="button">
+        + Tambah Simpang
+    </a>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <h3>
+            Daftar Simpang
+        </h3>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>No</th>
+                    <th>Kode</th>
+                    <th>Nama Simpang</th>
+                    <th>Jenis</th>
+                    <th>Wilayah</th>
+                    <th>Sumber Daya</th>
+                    <th>Sistem</th>
+                    <th>Aksi</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for s in simpang %}
+
+                <tr>
+
+                    <td>
+                        {{ loop.index }}
+                    </td>
+
+                    <td>
+                        <strong>{{ s[1] }}</strong>
+                    </td>
+
+                    <td>
+                        {{ s[2] }}
+                    </td>
+
+                    <td>
+                        {{ s[3] }}
+                    </td>
+
+                    <td>
+                        {{ s[13] }}
+                    </td>
+
+                    <td>
+                        {{ s[4] }}
+                    </td>
+
+                    <td>
+                        {{ s[5] }}
+                    </td>
+
+                    <td>
+
+                    <td>
+                        <div class="action">
+
+                            <a href="{{ url_for(
+                'simpang.detail',
+                id_simpang=s[0]
+            ) }}" class="button">
+                                Detail
+                            </a>
+
+                            <a href="{{ url_for(
+                'simpang.edit',
+                id_simpang=s[0]
+            ) }}" class="button btn-edit">
+                                Edit
+                            </a>
+
+                            <form action="{{ url_for(
+                'simpang.hapus',
+                id_simpang=s[0]
+            ) }}" method="POST" style="display:inline;">
+
+                                <button type="submit" class="button btn-delete" onclick="return confirm(
+                    'Yakin ingin menghapus {{ s[2] }}?'
+                );">
+                                    Hapus
+                                </button>
+
+                            </form>
+
+                        </div>
+                    </td>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}
+Monitoring - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">
+            Monitoring Perangkat
+        </h1>
+
+        <p class="page-subtitle">
+            Riwayat pemeriksaan kondisi perangkat APILL
+        </p>
+    </div>
+
+    <a
+        href="{{ url_for('monitoring.tambah') }}"
+        class="button">
+        + Tambah Pemeriksaan
+    </a>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+        <h3>Riwayat Monitoring</h3>
+    </div>
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>No</th>
+                    <th>Tanggal</th>
+                    <th>Simpang</th>
+                    <th>Perangkat</th>
+                    <th>Kondisi</th>
+                    <th>Status</th>
+                    <th>Petugas</th>
+                    <th>Aksi</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for m in monitoring %}
+
+                <tr>
+
+                    <td>
+                        {{ loop.index }}
+                    </td>
+
+                    <td>
+                        {{ m[5] }}
+                    </td>
+
+                    <td>
+                        <strong>{{ m[3] }}</strong>
+                        <br>
+                        <small>{{ m[2] }}</small>
+                    </td>
+
+                    <td>
+                        {{ m[4] }}
+                    </td>
+
+                    <td>
+                        {{ m[6] or '-' }}
+                    </td>
+
+                    <td>
+                        {{ m[7] or '-' }}
+                    </td>
+
+                    <td>
+                        {{ m[9] or '-' }}
+                    </td>
+
+                    <td>
+
+                        <div class="action">
+
+                            <a
+                                href="{{ url_for(
+                                    'monitoring.edit',
+                                    id_monitoring=m[0]
+                                ) }}"
+                                class="button btn-edit">
+                                Edit
+                            </a>
+
+                            <form
+                                action="{{ url_for(
+                                    'monitoring.hapus',
+                                    id_monitoring=m[0]
+                                ) }}"
+                                method="POST"
+                                style="display:inline;">
+
+                                <button
+                                    type="submit"
+                                    class="button btn-delete"
+                                    onclick="
+                                        return confirm(
+                                            'Yakin ingin menghapus data monitoring ini?'
+                                        );
+                                    ">
+                                    Hapus
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="8"
+                        class="empty-data">
+
+                        Belum ada data monitoring.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

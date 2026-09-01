@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% if edit %}
+{% set judul = "Edit Simpang" %}
+{% else %}
+{% set judul = "Tambah Simpang" %}
+{% endif %}
+
+{% block title %}
+{{ judul }} - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">{{ judul }}</h1>
+        <p class="page-subtitle">
+            Kelola data inventaris simpang APILL
+        </p>
+    </div>
+
+</div>
+
+
+<div class="form-card">
+
+    <form method="POST">
+
+        <div class="form-group">
+            <label>Kode Simpang</label>
+            <input type="text" name="kode_simpang" value="{{ data[1] if edit else '' }}" required>
+        </div>
+
+
+        <div class="form-group">
+            <label>Nama Simpang</label>
+            <input type="text" name="nama_simpang" value="{{ data[2] if edit else '' }}" required>
+        </div>
+
+
+        <div class="form-group">
+            <label>Jenis Simpang</label>
+            <input type="text" name="jenis_simpang" value="{{ data[3] if edit else '' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Wilayah</label>
+            <input type="text" name="wilayah" value="{{ data[13] if edit else '' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Sumber Daya</label>
+            <input type="text" name="sumber_daya" value="{{ data[4] if edit else '' }}">
+        </div>
+
+
+        <div class="form-group">
+            <label>Sistem</label>
+            <input type="text" name="sistem" value="{{ data[5] if edit else '' }}">
+        </div>
+
+
+        <div class="form-group">
+            <label>Aset</label>
+            <input type="text" name="aset" value="{{ data[6] if edit else '' }}">
+        </div>
+
+
+        <div class="form-group">
+            <label>Kewenangan</label>
+            <input type="text" name="kewenangan" value="{{ data[7] if edit else '' }}">
+        </div>
+
+
+        <div class="form-group">
+            <label>Status Jalan</label>
+            <input type="text" name="status_jalan" value="{{ data[8] if edit else '' }}">
+        </div>
+
+
+        <div class="form-group">
+            <label>Ruas Jalan</label>
+            <textarea name="ruas_jalan">{{ data[9] if edit else '' }}</textarea>
+        </div>
+
+
+        <div class="form-group">
+            <label>Tahun Anggaran</label>
+            <input type="date" name="tahun_anggaran" value="{{ data[10] if edit else '' }}">
+        </div>
+
+
+        <div class="form-group">
+            <label>Latitude</label>
+            <input type="number" step="any" name="latitude" value="{{ data[11] if edit else '' }}">
+        </div>
+
+
+        <div class="form-group">
+            <label>Longitude</label>
+            <input type="number" step="any" name="longitude" value="{{ data[12] if edit else '' }}">
+        </div>
+
+
+        <div class="form-actions">
+
+            <button type="submit" class="button">
+                Simpan
+            </button>
+
+            <a href="{{ url_for('simpang.index') }}" class="button btn-secondary">
+                Batal
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

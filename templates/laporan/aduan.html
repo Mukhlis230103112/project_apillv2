@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}
+Laporan Aduan - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">
+            Laporan Aduan
+        </h1>
+
+        <p class="page-subtitle">
+            Rekap laporan gangguan APILL
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="form-card" style="max-inline-size: none;">
+
+    <form method="GET">
+
+        <div
+            style="
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+            "
+        >
+
+            <div class="form-group">
+
+                <label>
+                    Tanggal Mulai
+                </label>
+
+                <input
+                    type="date"
+                    name="tanggal_mulai"
+                    value="{{ tanggal_mulai }}"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Tanggal Selesai
+                </label>
+
+                <input
+                    type="date"
+                    name="tanggal_selesai"
+                    value="{{ tanggal_selesai }}"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Simpang
+                </label>
+
+                <select name="id_simpang">
+
+                    <option value="">
+                        Semua Simpang
+                    </option>
+
+                    {% for s in simpang %}
+
+                    <option
+                        value="{{ s[0] }}"
+                        {% if id_simpang == s[0]|string %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ s[1] }} - {{ s[2] }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Kategori Gangguan
+                </label>
+
+                <select name="kategori">
+
+                    <option value="">
+                        Semua Kategori
+                    </option>
+
+                    {% for k in kategori_gangguan %}
+
+                    <option
+                        value="{{ k[0] }}"
+                        {% if kategori == k[0] %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ k[0] }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="button">
+                Terapkan Filter
+            </button>
+
+            <a
+                href="{{ url_for('laporan.index') }}"
+                class="button btn-secondary">
+                Reset
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<br>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+
+        <h3>
+            Data Laporan
+        </h3>
+
+        <span>
+            {{ laporan|length }} data
+        </span>
+
+    </div>
+
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>No</th>
+                    <th>Tanggal</th>
+                    <th>Simpang</th>
+                    <th>Jenis Gangguan</th>
+                    <th>Kategori</th>
+                    <th>Pelapor</th>
+                    <th>PIC</th>
+                    <th>Waktu TL</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for r in laporan %}
+
+                <tr>
+
+                    <td>
+                        {{ loop.index }}
+                    </td>
+
+                    <td>
+                        {{ r[1].strftime('%d-%m-%Y') }}
+                    </td>
+
+                    <td>
+                        <strong>
+                            {{ r[2] }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        {{ r[5] or '-' }}
+                    </td>
+
+                    <td>
+                        {{ r[6] or '-' }}
+                    </td>
+
+                    <td>
+                        {{ r[8] or '-' }}
+                    </td>
+
+                    <td>
+                        {{ r[10] or '-' }}
+                    </td>
+
+                    <td>
+                        {% if r[11] %}
+                            {{ r[11].strftime('%d-%m-%Y') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="empty-data">
+
+                        Tidak ada data laporan.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

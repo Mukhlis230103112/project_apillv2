@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% if edit %}
+    {% set judul = "Edit Monitoring" %}
+{% else %}
+    {% set judul = "Tambah Monitoring" %}
+{% endif %}
+
+{% block title %}
+{{ judul }} - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">
+            {{ judul }}
+        </h1>
+
+        <p class="page-subtitle">
+            Catat hasil pemeriksaan perangkat
+        </p>
+    </div>
+
+</div>
+
+
+<div class="form-card">
+
+    <form method="POST">
+
+        <div class="form-group">
+
+            <label>Perangkat</label>
+
+            <select
+                name="id_perangkat"
+                required>
+
+                <option value="">
+                    -- Pilih Perangkat --
+                </option>
+
+                {% for p in perangkat %}
+
+                <option
+                    value="{{ p[0] }}"
+                    {% if edit and data[1] == p[0] %}
+                        selected
+                    {% endif %}
+                >
+                    {{ p[1] }} - {{ p[2] }}
+                    - {{ p[3] }}
+                    {% if p[4] %}
+                        ({{ p[4] }})
+                    {% endif %}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Tanggal Pemeriksaan</label>
+
+            <input
+                type="datetime-local"
+                name="tanggal_pemeriksaan"
+                value="{% if edit %}{{ data[2].strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Kondisi</label>
+
+            <select
+                name="kondisi"
+                required>
+
+                <option value="">
+                    -- Pilih Kondisi --
+                </option>
+
+                <option
+                    value="Baik"
+                    {% if edit and data[3] == 'Baik' %}
+                        selected
+                    {% endif %}>
+                    Baik
+                </option>
+
+                <option
+                    value="Rusak"
+                    {% if edit and data[3] == 'Rusak' %}
+                        selected
+                    {% endif %}>
+                    Rusak
+                </option>
+
+                <option
+                    value="Tidak Aktif"
+                    {% if edit and data[3] == 'Tidak Aktif' %}
+                        selected
+                    {% endif %}>
+                    Tidak Aktif
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Status</label>
+
+            <select
+                name="status"
+                required>
+
+                <option value="">
+                    -- Pilih Status --
+                </option>
+
+                <option
+                    value="Aktif"
+                    {% if edit and data[4] == 'Aktif' %}
+                        selected
+                    {% endif %}>
+                    Aktif
+                </option>
+
+                <option
+                    value="Tidak Aktif"
+                    {% if edit and data[4] == 'Tidak Aktif' %}
+                        selected
+                    {% endif %}>
+                    Tidak Aktif
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Keterangan</label>
+
+            <textarea
+                name="keterangan"
+                placeholder="Catatan hasil pemeriksaan..."
+            >{{ data[5] if edit else '' }}</textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>Petugas</label>
+
+            <input
+                type="text"
+                name="petugas"
+                value="{{ data[6] if edit else '' }}"
+                placeholder="Nama petugas">
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="button">
+                Simpan
+            </button>
+
+            <a
+                href="{{ url_for('monitoring.index') }}"
+                class="button btn-secondary">
+                Batal
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

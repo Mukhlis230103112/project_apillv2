@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Inventaris APILL{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="brand">
+                <div class="brand-icon">
+
+                </div>
+
+                <div>
+                    <h2>APILL</h2>
+                    <span>Management System</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <span class="sidebar-title">MENU UTAMA</span>
+
+                <a href="{{ url_for('dashboard.index') }}" class="nav-link">
+                    <span class="nav-icon">⌂</span>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+
+            <div class="sidebar-section">
+
+                <span class="sidebar-title">INVENTARIS</span>
+
+                <a href="{{ url_for('simpang.index') }}" class="nav-link">
+                    <span class="nav-icon">⌖</span>
+                    <span>Simpang</span>
+                </a>
+
+                <a href="{{ url_for('perangkat.index') }}" class="nav-link">
+
+                    <span class="nav-icon">▣</span>
+
+                    <span>Perangkat</span>
+
+                </a>
+
+                <a href="{{ url_for('maps.index') }}" class="nav-link">
+
+                    <span class="nav-icon">🗺</span>
+
+                    <span>Peta Simpang</span>
+
+                </a>
+
+            </div>
+
+
+            <div class="sidebar-section">
+
+                <span class="sidebar-title">OPERASIONAL</span>
+
+                <a href="{{ url_for('aduan.index') }}" class="nav-link">
+
+                    <span class="nav-icon">⚠</span>
+
+                    <span>Aduan</span>
+
+                </a>
+
+                <a href="{{ url_for('monitoring.index') }}" class="nav-link">
+
+                    <span class="nav-icon">◉</span>
+
+                    <span>Monitoring</span>
+
+                </a>
+
+                <a href="{{ url_for('laporan.index') }}" class="nav-link">
+
+                    <span class="nav-icon">▤</span>
+
+                    <span>Laporan</span>
+
+                </a>
+
+            </div>
+
+
+            <div class="sidebar-footer">
+
+                <div class="user-info">
+
+                    <div class="avatar">
+                        A
+                    </div>
+
+                    <div>
+                        <strong>Admin</strong>
+                        <span>Administrator</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- MAIN AREA -->
+        <div class="main-area">
+
+            <header class="topbar">
+
+                <div>
+                    <span class="breadcrumb">
+                        Inventaris APILL
+                    </span>
+                </div>
+
+                <div class="topbar-right">
+
+                    <button class="icon-button">
+                        🔔
+                    </button>
+
+                    <div class="topbar-user">
+                        Admin
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <main class="content">
+
+                {% block content %}
+                {% endblock %}
+
+            </main>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

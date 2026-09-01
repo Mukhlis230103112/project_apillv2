@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% if edit %}
+    {% set judul = "Edit Aduan" %}
+{% else %}
+    {% set judul = "Tambah Aduan" %}
+{% endif %}
+
+{% block title %}
+{{ judul }} - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">
+            {{ judul }}
+        </h1>
+
+        <p class="page-subtitle">
+            Kelola laporan gangguan APILL
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="form-card">
+
+    <form
+        method="POST"
+        enctype="multipart/form-data">
+
+
+        <div class="form-group">
+
+            <label>
+                Tanggal Aduan
+            </label>
+
+            <input
+                type="datetime-local"
+                name="tanggal_aduan"
+                value="{% if edit and data[2] %}{{ data[2].strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                required>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Nama Simpang
+            </label>
+
+            <select
+                name="id_simpang"
+                required>
+
+                <option value="">
+                    -- Pilih Simpang --
+                </option>
+
+                {% for s in simpang %}
+
+                <option
+                    value="{{ s[0] }}"
+                    {% if edit and data[1] == s[0] %}
+                        selected
+                    {% endif %}
+                >
+                    {{ s[1] }} - {{ s[2] }}
+                </option>
+
+                {% endfor %}
+
+            </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Lokasi Simpang
+            </label>
+
+            <input
+                type="text"
+                name="lokasi_simpang"
+                value="{{ data[3] if edit else '' }}">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Detail Posisi
+            </label>
+
+            <textarea
+                name="detail_posisi"
+            >{{ data[4] if edit else '' }}</textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Jenis Gangguan
+            </label>
+
+            <input
+                type="text"
+                name="jenis_gangguan"
+                value="{{ data[5] if edit else '' }}">
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Penyebab Gangguan
+            </label>
+
+            <textarea
+                name="penyebab_gangguan"
+            >{{ data[6] if edit else '' }}</textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label>
+                Pelapor
+            </label>
+
+            <input
+                type="text"
+                name="pelapor"
+                list="pelaporOptions"
+                placeholder="Pilih atau ketik manual"
+                value="{{ data[7] if edit else '' }}">
+
+            <datalist id="pelaporOptions">
+                <option value="Petugas">
+                <option value="Polisi">
+                <option value="Masyarakat">
+            </datalist>
+
+        </div>
+
+
+        {% if edit and data[8] %}
+
+        <div class="form-group">
+
+            <label>
+                Foto Kondisi Awal Saat Ini
+            </label>
+
+            <div>
+
+                <img
+                    src="{{ url_for(
+                        'static',
+                        filename=data[8]
+                    ) }}"
+                    alt="Kondisi Awal"
+                    style="
+                        max-inline-size: 350px;
+                        inline-size: 100%;
+                        border-radius: 8px;
+                    ">
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <div class="form-group">
+
+            <label>
+                {% if edit %}
+                    Ganti Foto Kondisi Awal
+                {% else %}
+                    Foto Kondisi Awal
+                {% endif %}
+            </label>
+
+            <input
+                type="file"
+                name="foto_kondisi_awal"
+                accept=".jpg,.jpeg,.png,.webp">
+
+            {% if edit %}
+            <small>
+                Kosongkan jika tidak ingin mengganti foto.
+            </small>
+            {% endif %}
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <button
+                type="submit"
+                class="button">
+                Simpan
+            </button>
+
+            <a
+                href="{{ url_for('aduan.index') }}"
+                class="button btn-secondary">
+                Batal
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

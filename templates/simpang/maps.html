@@ -1,0 +1,656 @@
+{% extends "base.html" %}
+
+{% block title %}
+Peta Simpang - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">
+            Peta Simpang APILL
+        </h1>
+
+        <p class="page-subtitle">
+            Sebaran lokasi simpang berdasarkan koordinat terdaftar
+        </p>
+    </div>
+
+</div>
+
+
+<div class="maps-layout">
+
+    <!-- =========================
+         PETA
+    ========================== -->
+    <div class="maps-map-card">
+
+        <div class="maps-search-float">
+            <input
+                type="text"
+                id="mapsSearchInput"
+                placeholder="Cari nama atau kode simpang..."
+            >
+        </div>
+
+        <div id="petaSimpang"></div>
+    </div>
+
+</div>
+
+
+<link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
+>
+
+<style>
+
+    .maps-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .maps-search-float {
+        position: absolute;
+        inset-block-start: 16px;
+        inset-inline-start: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        inline-size: min(420px, 90%);
+    }
+
+    .maps-search-float input {
+        margin: 0;
+        inline-size: 100%;
+        padding: 11px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        background: var(--white);
+        font-size: 13.5px;
+    }
+
+    .maps-search-float input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .maps-map-card {
+        position: relative;
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        block-size: 75vh;
+        min-block-size: 480px;
+    }
+
+    #petaSimpang {
+        inline-size: 100%;
+        block-size: 100%;
+    }
+
+    .leaflet-popup-content strong {
+        display: block;
+        margin-block-end: 4px;
+        font-family: var(--font-display);
+    }
+
+    .leaflet-popup-content a {
+        color: var(--primary);
+        font-size: 12.5px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .apill-traffic-icon {
+        background: transparent;
+        border: none;
+    }
+
+    .simpang-label {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 3px 9px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .simpang-label::before {
+        border-right-color: var(--white);
+    }
+
+    /* =========================
+       BADGE WILAYAH (kabupaten & kecamatan)
+    ========================== */
+
+    .wilayah-badge-icon {
+        background: transparent;
+        border: none;
+    }
+
+    .wilayah-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #fff;
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        border: 2px solid #fff;
+        cursor: pointer;
+    }
+
+    .wilayah-badge.tingkat-provinsi {
+        background: #7c3aed;
+        font-size: 15px;
+        padding: 10px 18px;
+    }
+
+    .wilayah-badge.tingkat-kabupaten {
+        background: var(--primary);
+    }
+
+    .wilayah-badge.tingkat-kecamatan {
+        background: #0ea5e9;
+    }
+
+    .wilayah-badge .count {
+        background: rgba(255,255,255,0.25);
+        border-radius: 999px;
+        padding: 1px 8px;
+        font-size: 12px;
+    }
+
+    /* Garis batas wilayah administrasi */
+    .batas-kabupaten-line {
+        fill: rgba(59, 130, 246, 0.04);
+        stroke: #3b82f6;
+    }
+
+    .batas-kecamatan-line {
+        fill: rgba(14, 165, 233, 0.05);
+        stroke: #0ea5e9;
+    }
+
+    /* Garis zona di tingkat marker individual: dibuat cukup tebal &
+       kontras supaya jelas terlihat meski marker individual sudah
+       tampil di atasnya. */
+    .zona-kecamatan-outline {
+        fill: rgba(249, 115, 22, 0.12);
+        stroke: #ea580c;
+    }
+
+    .zona-kecamatan-label {
+        background: #ea580c;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .zona-kecamatan-label::before {
+        border-right-color: #ea580c;
+    }
+
+    .zona-kecamatan-label-icon {
+        background: transparent;
+        border: none;
+    }
+
+    @media (max-width: 900px) {
+        .maps-map-card {
+            block-size: 60vh;
+        }
+    }
+
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+
+<script>
+
+    // =====================================================================
+    // KONFIGURASI
+    // =====================================================================
+
+    // Titik tengah default peta (Yogyakarta) — sesuaikan dengan lokasi
+    // wilayah kerja kamu bila berbeda.
+    const DEFAULT_CENTER = [-7.7956, 110.3695];
+    const DEFAULT_ZOOM = 9;
+
+    // zoom < ZOOM_PROVINSI              -> 1 badge TOTAL (semua simpang)
+    // ZOOM_PROVINSI <= zoom < ZOOM_KABUPATEN  -> badge per KABUPATEN
+    // ZOOM_KABUPATEN <= zoom < ZOOM_KECAMATAN -> badge per KECAMATAN
+    // zoom >= ZOOM_KECAMATAN            -> marker individual
+    const ZOOM_PROVINSI = 9;
+    const ZOOM_KABUPATEN = 11;
+    const ZOOM_KECAMATAN = 13;
+
+    // Nama properti pada GeoJSON batas wilayah. Nilai default ini sudah
+    // disesuaikan dengan data GADM (repo indonesia-geojson-archive):
+    // - kabupaten/kota -> nama ada di field "NAME_2"
+    // - kecamatan      -> nama ada di field "NAME_3"
+    // Sesuaikan lagi kalau kamu pakai sumber data lain.
+    const PROP_NAMA_KABUPATEN = "NAME_2";
+    const PROP_NAMA_KECAMATAN = "NAME_3";
+
+    // =====================================================================
+    // INISIALISASI PETA
+    // =====================================================================
+
+    const map = L.map("petaSimpang").setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19
+    }).addTo(map);
+
+    const apillIcon = L.divIcon({
+        className: "apill-traffic-icon",
+        html: `
+            <svg width="26" height="46" viewBox="0 0 26 46" xmlns="http://www.w3.org/2000/svg">
+                <rect x="9" y="0" width="8" height="10" rx="1.5" fill="#4b5563"/>
+                <rect x="1" y="2" width="24" height="34" rx="6" fill="#1f2937"/>
+                <circle cx="13" cy="11" r="6" fill="#ef4444"/>
+                <circle cx="13" cy="19" r="6" fill="#facc15"/>
+                <circle cx="13" cy="27" r="6" fill="#22c55e"/>
+                <polygon points="13,46 6,36 20,36" fill="#1f2937"/>
+            </svg>
+        `,
+        iconSize: [26, 46],
+        iconAnchor: [13, 46],
+        popupAnchor: [0, -42]
+    });
+
+    // Layer group per tingkat. Hanya satu grup marker/badge yang tampil
+    // pada satu waktu; garis batas mengikuti tingkat yang sama.
+    const provinsiLayer = L.layerGroup();    // badge total (semua simpang)
+    const kabupatenLayer = L.layerGroup();   // badge + garis batas kabupaten
+    const kecamatanLayer = L.layerGroup();   // badge + garis batas kecamatan
+    const markerLayer = L.layerGroup();      // marker individual
+
+    // Garis zona kecamatan SAJA (tanpa badge), khusus kecamatan yang
+    // punya >= 2 simpang. Layer ini tampil BERSAMAAN dengan markerLayer
+    // di tingkat zoom marker individual, sebagai konteks wilayah.
+    const zonaKecamatanLayer = L.layerGroup();
+
+    const markerById = {};
+    let allItems = [];
+    let searchActive = false;
+
+    // Diisi setelah fetch selesai. Kalau salah satu/keduanya null,
+    // berarti endpoint batas administrasi belum tersedia -> peta
+    // otomatis fallback ke marker individual di semua level zoom,
+    // supaya tampilan tidak kosong sambil boundary-nya disiapkan.
+    let batasKabupatenTersedia = false;
+    let batasKecamatanTersedia = false;
+
+    // =====================================================================
+    // POINT-IN-POLYGON: TENTUKAN KABUPATEN/KECAMATAN SETIAP TITIK
+    // =====================================================================
+
+    function cariPoligonPemilik(lat, lng, geojsonFeatureCollection) {
+        if (!geojsonFeatureCollection) return null;
+        const titik = turf.point([lng, lat]);
+
+        for (const feature of geojsonFeatureCollection.features) {
+            try {
+                if (turf.booleanPointInPolygon(titik, feature)) {
+                    return feature;
+                }
+            } catch (e) {
+                // Lewati feature dengan geometri tidak valid, jangan
+                // hentikan proses keseluruhan.
+                continue;
+            }
+        }
+        return null;
+    }
+
+    function tetapkanWilayahAdministrasi(items, batasKabupaten, batasKecamatan) {
+        items.forEach(function (item) {
+
+            const fKab = cariPoligonPemilik(item.lat, item.lng, batasKabupaten);
+            const fKec = cariPoligonPemilik(item.lat, item.lng, batasKecamatan);
+
+            item._kabupaten = fKab
+                ? (fKab.properties[PROP_NAMA_KABUPATEN] || "Tanpa Nama")
+                : (item.wilayah || "Luar Batas Kabupaten");
+
+            item._kecamatan = fKec
+                ? (fKec.properties[PROP_NAMA_KECAMATAN] || "Tanpa Nama")
+                : (item.wilayah || "Luar Batas Kecamatan");
+        });
+    }
+
+    // =====================================================================
+    // BADGE WILAYAH (posisi badge mengikuti bentuk poligon, bukan
+    // sekadar rata-rata titik, supaya badge tidak jatuh di luar wilayah
+    // untuk poligon yang memanjang/cekung)
+    // =====================================================================
+
+    function buatIconBadge(nama, jumlah, tingkat) {
+        return L.divIcon({
+            className: "wilayah-badge-icon",
+            html:
+                '<div class="wilayah-badge tingkat-' + tingkat + '">' +
+                    "<span>" + nama + "</span>" +
+                    '<span class="count">' + jumlah + "</span>" +
+                "</div>",
+            iconSize: null,
+            iconAnchor: [40, 16]
+        });
+    }
+
+    function bangunLayerBerbasisBatas(items, batasGeojson, propNama, groupField, tingkat, targetLayer) {
+        if (!batasGeojson) return;
+
+        // Kelompokkan titik berdasarkan hasil point-in-polygon (groupField),
+        // lalu render satu badge + satu outline poligon per wilayah yang
+        // benar-benar punya simpang di dalamnya.
+        const grup = {};
+        items.forEach(function (item) {
+            const nama = item[groupField];
+            if (!grup[nama]) grup[nama] = [];
+            grup[nama].push(item);
+        });
+
+        batasGeojson.features.forEach(function (feature) {
+            const nama = feature.properties[propNama] || "Tanpa Nama";
+            const itemsWilayah = grup[nama];
+            if (!itemsWilayah || itemsWilayah.length === 0) return; // lewati wilayah kosong
+
+            // Garis batas administrasi
+            const outline = L.geoJSON(feature, {
+                className: tingkat === "kabupaten"
+                    ? "batas-kabupaten-line"
+                    : "batas-kecamatan-line",
+                style: { weight: 1.5, fillOpacity: 0.05 }
+            });
+            targetLayer.addLayer(outline);
+
+            // Titik badge: pakai turf.pointOnFeature supaya selalu jatuh
+            // di dalam poligon (aman untuk bentuk wilayah yang tidak
+            // cembung), bukan rata-rata koordinat titik simpang.
+            let titikBadge;
+            try {
+                const p = turf.pointOnFeature(feature);
+                titikBadge = [p.geometry.coordinates[1], p.geometry.coordinates[0]];
+            } catch (e) {
+                titikBadge = [itemsWilayah[0].lat, itemsWilayah[0].lng];
+            }
+
+            const badgeMarker = L.marker(titikBadge, {
+                icon: buatIconBadge(nama, itemsWilayah.length, tingkat)
+            });
+
+            const bounds = L.latLngBounds(
+                itemsWilayah.map(function (i) { return [i.lat, i.lng]; })
+            );
+
+            badgeMarker.on("click", function () {
+                map.fitBounds(bounds, { padding: [40, 40] });
+            });
+
+            targetLayer.addLayer(badgeMarker);
+        });
+    }
+
+    // Badge total: satu badge mewakili SEMUA simpang, dipakai saat zoom
+    // paling jauh sebelum data pecah per kabupaten. Tidak butuh file
+    // batas provinsi terpisah -- posisinya cukup titik tengah dari
+    // sebaran seluruh data (bounds center), karena cuma perlu 1 badge.
+    function bangunLayerProvinsi(items, targetLayer) {
+        if (!items || items.length === 0) return;
+
+        const bounds = L.latLngBounds(
+            items.map(function (i) { return [i.lat, i.lng]; })
+        );
+
+        const badgeMarker = L.marker(bounds.getCenter(), {
+            icon: buatIconBadge("Semua Wilayah", items.length, "provinsi")
+        });
+
+        badgeMarker.on("click", function () {
+            map.setView(bounds.getCenter(), ZOOM_PROVINSI);
+        });
+
+        targetLayer.addLayer(badgeMarker);
+    }
+
+    // Menggambar garis batas kecamatan SAJA (tanpa badge angka), khusus
+    // untuk kecamatan yang jumlah simpang-nya >= minJumlah. Dipakai
+    // sebagai konteks visual saat marker individual sudah ditampilkan.
+    function bangunZonaOutline(items, batasGeojson, propNama, groupField, minJumlah, targetLayer) {
+        if (!batasGeojson) return;
+
+        const grup = {};
+        items.forEach(function (item) {
+            const nama = item[groupField];
+            if (!grup[nama]) grup[nama] = [];
+            grup[nama].push(item);
+        });
+
+        batasGeojson.features.forEach(function (feature) {
+            const nama = feature.properties[propNama] || "Tanpa Nama";
+            const itemsWilayah = grup[nama];
+            if (!itemsWilayah || itemsWilayah.length < minJumlah) return;
+
+            const outline = L.geoJSON(feature, {
+                className: "zona-kecamatan-outline",
+                style: { weight: 3, dashArray: "8,5", fillOpacity: 0.12 }
+            });
+            targetLayer.addLayer(outline);
+
+            // Label permanen di tengah zona (bukan cuma tooltip hover),
+            // supaya nama kecamatan + jumlah simpang langsung terlihat.
+            let titikLabel;
+            try {
+                const p = turf.pointOnFeature(feature);
+                titikLabel = [p.geometry.coordinates[1], p.geometry.coordinates[0]];
+            } catch (e) {
+                titikLabel = [itemsWilayah[0].lat, itemsWilayah[0].lng];
+            }
+
+            const labelMarker = L.marker(titikLabel, {
+                icon: L.divIcon({
+                    className: "zona-kecamatan-label-icon",
+                    html:
+                        '<div class="zona-kecamatan-label">' +
+                        nama + " &middot; " + itemsWilayah.length +
+                        "</div>",
+                    iconSize: null,
+                    iconAnchor: [40, 10]
+                }),
+                interactive: false
+            });
+            targetLayer.addLayer(labelMarker);
+        });
+    }
+
+    function bangunLayerMarker(items) {
+        items.forEach(function (item) {
+
+            const marker = L.marker(
+                [item.lat, item.lng],
+                { icon: apillIcon }
+            );
+
+            marker.bindTooltip(
+                item.nama_simpang,
+                {
+                    permanent: true,
+                    direction: "right",
+                    offset: [8, -20],
+                    className: "simpang-label"
+                }
+            );
+
+            marker.bindPopup(
+                "<strong>" + item.nama_simpang + "</strong>" +
+                item.kode_simpang + " &middot; " +
+                (item.jenis_simpang || "-") +
+                (item._kecamatan ? " &middot; " + item._kecamatan : "") +
+                "<br>" +
+                '<a href="/simpang/detail/' + item.id_simpang + '">' +
+                "Lihat detail &rarr;</a>"
+            );
+
+            marker.simpangData = item;
+            markerLayer.addLayer(marker);
+            markerById[item.id_simpang] = marker;
+        });
+    }
+
+    // Tentukan layer mana yang aktif berdasarkan zoom saat ini,
+    // kecuali sedang searching (search selalu pakai marker individual).
+    function perbaruiTampilanLayer() {
+        const zoom = map.getZoom();
+
+        [provinsiLayer, kabupatenLayer, kecamatanLayer, markerLayer, zonaKecamatanLayer].forEach(function (l) {
+            if (map.hasLayer(l)) map.removeLayer(l);
+        });
+
+        if (searchActive) {
+            map.addLayer(markerLayer);
+            return;
+        }
+
+        if (zoom < ZOOM_PROVINSI) {
+            map.addLayer(provinsiLayer);
+        } else if (zoom < ZOOM_KABUPATEN && batasKabupatenTersedia) {
+            map.addLayer(kabupatenLayer);
+        } else if (zoom < ZOOM_KECAMATAN && batasKecamatanTersedia) {
+            map.addLayer(kecamatanLayer);
+        } else {
+            // Tingkat marker individual: tampilkan marker + garis zona
+            // kecamatan (khusus kecamatan dengan >= 2 simpang) sebagai
+            // konteks wilayah.
+            map.addLayer(markerLayer);
+            if (batasKecamatanTersedia) {
+                map.addLayer(zonaKecamatanLayer);
+            }
+        }
+    }
+
+    map.on("zoomend", perbaruiTampilanLayer);
+
+    // =====================================================================
+    // MUAT DATA: titik simpang + dua level batas administrasi
+    // =====================================================================
+
+    Promise.all([
+        fetch("/api/simpang-geojson").then(function (r) { return r.json(); }),
+        fetch("/api/batas-kabupaten").then(function (r) { return r.json(); }).catch(function () { return null; }),
+        fetch("/api/batas-kecamatan").then(function (r) { return r.json(); }).catch(function () { return null; })
+    ]).then(function (hasil) {
+
+        const dataSimpang = hasil[0];
+        const batasKabupaten = hasil[1];
+        const batasKecamatan = hasil[2];
+
+        allItems = dataSimpang;
+
+        batasKabupatenTersedia = !!(batasKabupaten && batasKabupaten.features && batasKabupaten.features.length);
+        batasKecamatanTersedia = !!(batasKecamatan && batasKecamatan.features && batasKecamatan.features.length);
+
+        tetapkanWilayahAdministrasi(allItems, batasKabupaten, batasKecamatan);
+
+        bangunLayerProvinsi(allItems, provinsiLayer);
+        bangunLayerBerbasisBatas(
+            allItems, batasKabupaten, PROP_NAMA_KABUPATEN,
+            "_kabupaten", "kabupaten", kabupatenLayer
+        );
+        bangunLayerBerbasisBatas(
+            allItems, batasKecamatan, PROP_NAMA_KECAMATAN,
+            "_kecamatan", "kecamatan", kecamatanLayer
+        );
+        bangunLayerMarker(allItems);
+        bangunZonaOutline(
+            allItems, batasKecamatan, PROP_NAMA_KECAMATAN,
+            "_kecamatan", 2, zonaKecamatanLayer
+        );
+
+        perbaruiTampilanLayer();
+
+        if (allItems.length > 0) {
+            const bounds = allItems.map(function (item) {
+                return [item.lat, item.lng];
+            });
+            // maxZoom dibatasi supaya tampilan AWAL selalu badge total
+            // dulu (tidak langsung zoom in ke kabupaten/kecamatan),
+            // sesuai alur: total -> kabupaten -> kecamatan -> marker.
+            map.fitBounds(bounds, { padding: [30, 30], maxZoom: ZOOM_PROVINSI - 1 });
+        }
+    }).catch(function (err) {
+        console.error(err);
+    });
+
+    // =========================
+    // PENCARIAN LANGSUNG DI PETA
+    // Saat searching, badge/garis batas disembunyikan dan hanya marker
+    // individual yang cocok yang ditampilkan.
+    // =========================
+    document
+        .getElementById("mapsSearchInput")
+        .addEventListener("input", function (e) {
+
+            const keyword = e.target.value.toLowerCase().trim();
+            searchActive = keyword !== "";
+            const matched = [];
+
+            Object.values(markerById).forEach(function (marker) {
+
+                const item = marker.simpangData;
+                const text = (
+                    item.nama_simpang + " " + item.kode_simpang + " " +
+                    (item._kecamatan || "") + " " + (item._kabupaten || "")
+                ).toLowerCase();
+
+                const isMatch = keyword === "" || text.includes(keyword);
+
+                if (isMatch) {
+                    if (!markerLayer.hasLayer(marker)) {
+                        markerLayer.addLayer(marker);
+                    }
+                    if (keyword !== "") matched.push(marker);
+                } else {
+                    markerLayer.removeLayer(marker);
+                }
+            });
+
+            perbaruiTampilanLayer();
+
+            if (keyword !== "" && matched.length > 0) {
+
+                if (matched.length === 1) {
+                    map.setView(matched[0].getLatLng(), 16);
+                } else {
+                    const bounds = matched.map(function (m) {
+                        return m.getLatLng();
+                    });
+                    map.fitBounds(bounds, { padding: [30, 30] });
+                }
+            }
+        });
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}
+Detail Perangkat - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">
+            Detail Perangkat
+        </h1>
+
+        <p class="page-subtitle">
+            Informasi perangkat APILL
+        </p>
+    </div>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <tr>
+                <th>ID Perangkat</th>
+                <td>{{ data[0] }}</td>
+            </tr>
+
+            <tr>
+                <th>Kode Simpang</th>
+                <td>{{ data[2] }}</td>
+            </tr>
+
+            <tr>
+                <th>Nama Simpang</th>
+                <td>{{ data[3] }}</td>
+            </tr>
+
+            <tr>
+                <th>Jenis Perangkat</th>
+                <td>{{ data[4] }}</td>
+            </tr>
+
+            <tr>
+                <th>Jenis / Ukuran</th>
+                <td>{{ data[5] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Daya</th>
+                <td>{{ data[6] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Sistem</th>
+                <td>{{ data[7] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Komunikasi</th>
+                <td>{{ data[8] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Jumlah</th>
+                <td>{{ data[9] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Kondisi</th>
+                <td>{{ data[10] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Kategori Kondisi</th>
+                <td>{{ data[11] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Keterangan</th>
+                <td>{{ data[12] or '-' }}</td>
+            </tr>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<div class="back-button-container">
+
+    <a
+        href="{{ url_for('perangkat.index') }}"
+        class="button btn-secondary">
+        ← Kembali
+    </a>
+
+</div>
+
+{% endblock %}

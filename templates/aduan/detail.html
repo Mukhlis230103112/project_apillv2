@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}
+Detail Aduan - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+
+        <h1 class="page-title">
+            Detail Aduan
+        </h1>
+
+        <p class="page-subtitle">
+            Informasi laporan gangguan APILL
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <tr>
+                <th>ID Aduan</th>
+                <td>{{ data[0] }}</td>
+            </tr>
+
+            <tr>
+                <th>Tanggal Aduan</th>
+                <td>
+                    {{ data[1].strftime('%d-%m-%Y %H:%M') }}
+                </td>
+            </tr>
+
+            <tr>
+                <th>Kode Simpang</th>
+                <td>{{ data[2] }}</td>
+            </tr>
+
+            <tr>
+                <th>Nama Simpang</th>
+                <td>{{ data[3] }}</td>
+            </tr>
+
+            <tr>
+                <th>Lokasi Simpang</th>
+                <td>{{ data[4] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Detail Posisi</th>
+                <td>{{ data[5] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Jenis Gangguan</th>
+                <td>{{ data[6] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Kategori Gangguan</th>
+                <td>{{ data[7] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Penyebab Gangguan</th>
+                <td>{{ data[8] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Pelapor</th>
+                <td>{{ data[9] or '-' }}</td>
+            </tr>
+
+            <tr>
+                <th>Status Aduan</th>
+                <td>{{ data[11] or '-' }}</td>
+            </tr>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<div class="table-card" style="margin-block-start: 20px;">
+
+    <div class="table-header">
+
+        <h3>
+            Kondisi Awal
+        </h3>
+
+    </div>
+
+    <div style="padding: 20px;">
+
+        {% if data[10] %}
+
+        <img src="{{ url_for(
+                    'static',
+                    filename=data[10]
+                ) }}" alt="Kondisi Awal" style="
+                    max-inline-size: 500px;
+                    inline-size: 100%;
+                    border-radius: 8px;
+                ">
+
+        {% else %}
+
+        <p class="empty-data">
+            Belum ada foto kondisi awal.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+<div class="table-card" style="margin-block-start: 20px;">
+
+    <div class="table-header">
+        <h3>
+            Penanganan Aduan
+        </h3>
+    </div>
+
+    <div style="padding: 20px;">
+
+        <form method="POST" action="{{ url_for(
+                'aduan.penanganan',
+                id_aduan=data[0]
+            ) }}" enctype="multipart/form-data">
+
+
+            <div class="form-group">
+
+                <label>
+                    Status Penanganan
+                </label>
+
+                <input type="text" value="{{ data[13] or 'Diproses' }}" readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Tindak Lanjut
+                </label>
+
+                <textarea name="tindak_lanjut"
+                    placeholder="Masukkan tindakan yang dilakukan...">{{ data[14] or '' }}</textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    PIC
+                </label>
+
+                <input type="text" name="pic" value="{{ data[15] or '' }}" placeholder="Nama PIC / Tim">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Waktu TL
+                </label>
+
+                <input type="datetime-local" name="waktu_tl"
+                    value="{% if data[16] %}{{ data[16].strftime('%Y-%m-%dT%H:%M') }}{% endif %}">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Foto Proses TL
+                </label>
+
+                <input type="file" name="foto_proses_tl" accept=".jpg,.jpeg,.png,.webp">
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Foto Kondisi Akhir
+                </label>
+
+                <input type="file" name="foto_kondisi_akhir" accept=".jpg,.jpeg,.png,.webp">
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <button type="submit" class="button">
+                    Simpan Penanganan
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<div class="table-card" style="margin-block-start: 20px;">
+
+    <div class="table-header">
+        <h3>
+            Dokumentasi Penanganan
+        </h3>
+    </div>
+
+
+    <div style="padding: 20px;">
+
+        <div style="margin-block-end: 25px;">
+
+            <h4>
+                Foto Proses TL
+            </h4>
+
+            {% if data[17] %}
+
+            <img src="{{ url_for(
+                        'static',
+                        filename=data[17]
+                    ) }}" alt="Foto Proses TL" style="
+                        max-inline-size: 500px;
+                        inline-size: 100%;
+                        margin-block-start: 10px;
+                        border-radius: 8px;
+                    ">
+
+            {% else %}
+
+            <p class="empty-data">
+                Belum ada foto proses.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <div>
+
+            <h4>
+                Foto Kondisi Akhir
+            </h4>
+
+            {% if data[18] %}
+
+            <img src="{{ url_for(
+                        'static',
+                        filename=data[18]
+                    ) }}" alt="Foto Kondisi Akhir" style="
+                        max-inline-size: 500px;
+                        inline-size: 100%;
+                        margin-block-start: 10px;
+                        border-radius: 8px;
+                    ">
+
+            {% else %}
+
+            <p class="empty-data">
+                Belum ada foto kondisi akhir.
+            </p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="back-button-container">
+
+    <a
+        href="{{ url_for('aduan.index') }}"
+        class="button btn-secondary">
+        ← Kembali
+    </a>
+
+</div>
+
+{% endblock %}

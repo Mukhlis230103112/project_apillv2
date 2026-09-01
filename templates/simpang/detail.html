@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}
+Detail Simpang - Inventaris APILL
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+
+    <div>
+        <h1 class="page-title">
+            Detail Simpang
+        </h1>
+
+        <p class="page-subtitle">
+            Informasi lengkap inventaris simpang APILL
+        </p>
+    </div>
+
+</div>
+
+
+<div class="table-card">
+
+    <div class="table-header">
+        <h3>Informasi Simpang</h3>
+    </div>
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <tbody>
+
+                <tr>
+                    <th>ID Simpang</th>
+                    <td>{{ data[0] }}</td>
+                </tr>
+
+                <tr>
+                    <th>Kode Simpang</th>
+                    <td>{{ data[1] }}</td>
+                </tr>
+
+                <tr>
+                    <th>Nama Simpang</th>
+                    <td>{{ data[2] }}</td>
+                </tr>
+
+                <tr>
+                    <th>Jenis Simpang</th>
+                    <td>{{ data[3] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Wilayah</th>
+                    <td>{{ data[13] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Sumber Daya</th>
+                    <td>{{ data[4] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Sistem</th>
+                    <td>{{ data[5] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Aset</th>
+                    <td>{{ data[6] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Kewenangan</th>
+                    <td>{{ data[7] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Status Jalan</th>
+                    <td>{{ data[8] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Ruas Jalan</th>
+                    <td>{{ data[9] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Tahun Anggaran</th>
+                    <td>{{ data[10] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Latitude</th>
+                    <td>{{ data[11] or '-' }}</td>
+                </tr>
+
+                <tr>
+                    <th>Longitude</th>
+                    <td>{{ data[12] or '-' }}</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<div class="back-button-container">
+
+    <a
+        href="{{ url_for('simpang.index') }}"
+        class="button btn-secondary">
+        ← Kembali
+    </a>
+
+</div>
+
+{% endblock %}
